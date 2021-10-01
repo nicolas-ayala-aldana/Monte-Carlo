@@ -1,0 +1,92 @@
+---
+title: "Monte Carlo"
+author: "Nicolas Ayala"
+date: "01-10-2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+**Simulación de Montecarlo**
+Simulación de previsión de consumo de insulina para pacientes que tienen un diagnóstico de diabetes mellitus y que tienen condición patológica ser insulino resistentes. En base a este escenario, se ha obtenido, a partir de los datos históricos de la Bodega de Farmacia y la Unidad de Farmacia, la media de gasto diario de insulina (1000 dosis) y su desviación estandar (250 dosis). 
+```{r}
+# Creación de la simulación. Se define el "n" del experimento y se fija con set.seed.
+set.seed(10)
+stock_insulina = rnorm (n= 100 , mean= 1000 , sd= 250)
+par (mfrow= c(3,1))
+plot (stock_insulina, ylab = "Número de dosis", xlab= "Días", main="Consumo diario de insulina en la Unidad de Farmacia", col="magenta")
+hist (stock_insulina, ylab= "Frecuencia" , xlab= "Dosis de insulina", main= "Distribución absoluta de dosis de insulina por día", col="skyblue1")
+hist (stock_insulina, freq = FALSE, main = "Histograma y curva de densidad",xlab= "Dosis de insulina", col="skyblue1")
+curve(dnorm (x, mean= 1000 , sd= 250), from= 0 , to= 1500, add= TRUE, col= "magenta", lwd=2)
+```
+
+
+```{r}
+cat ("La media de la medición para una serie de 100 datos (días) es:", mean(stock_insulina))
+```
+```{r}
+cat ("La desviación estandar para una serie de 100 datos (días) es:" , sd(stock_insulina))
+```
+
+
+```{r}
+# La media de datos es 965.8 dosis y su desviación estándar es 235.3 dosis. Los resultados son similares a los datos históricos pero no exactamente 1000 y 250, respectivamente. Replicando "n" eventos podrían obtenerse resultados más cercanos a los valores teóricos.
+```
+
+
+```{r}
+# Si quisieramos estudiar el comportamiento del consumo de insulina en una serie de datos medidos longitudinalmente tendríamos la siguiente representación con un replicate (2). Nos centraremos particularmente en la predicción y estudio de la media.
+set.seed(10)
+norm.rep2 = replicate(n= 2, rnorm(n= 100, mean= 1000 , sd= 250))
+ts.plot(norm.rep2, main= "Distribución del consumo de insulina en una serie longitudinal" , ylab= "Dosis de insulina", xlab= "Series de mediciones en el tiempo", col="magenta")
+```
+
+Cálculo del error estándar teórico
+```{r}
+250/ sqrt(1000) # Cálculo del error estándar teórico
+```
+
+Error estándar de la media en el problema
+```{r}
+sd(norm.rep2)
+# La desviación estándar es de 238.32 y el valor teórico de la serie de datos es 250
+
+
+sd(apply(X=norm.rep2, MARGIN= 2 , FUN= mean))
+# El resultado del error estandar es 7.35 y el valor teórico es de 7.90 . El resultado de la desviación estándar es de 238.32 y el valor teórico es 250. Esto es un avance ya que mejora la cantidad de datos pero sin embargo sería interesante saber como se comporta el error de la medición del consumo diario de insulina en un muestreo mayor.
+```
+
+
+```{r}
+# Se hace una replicación del experimento de 50 para estudiar cómo se comporta la media versus el valor teórico.
+set.seed(100)
+norm.rep50 = replicate(n= 50, rnorm(n= 100, mean= 1000 , sd= 250))
+sd(apply(X=norm.rep50, MARGIN= 2 , FUN= mean)) # Dispersión de la media
+```
+
+
+```{r}
+hist(apply(X=norm.rep50, MARGIN= 2 , FUN= mean), 
+      main = "Simulación de distribución del muestreo",
+      xlab= "Estimación del consumo de insulina", ylab= "Frecuencia absoluta",
+      col= 2)
+
+abline(v=mean(norm.rep50), lwd=4, lty=3, col="darkblue")
+```
+
+```{r}
+cat ("La media de la medición para una serie de 100 datos en un experimento de 2000 réplicas es:", mean(norm.rep50))
+```
+
+
+```{r}
+cat ("La desviación estandar para una serie de 100 datos en un experimento de 2000 réplicas es:" , sd(norm.rep50))
+```
+
+Conclusiones
+```{r}
+# En la medida que se aplica una modelación estadística de Montecarlo las cifras se parecen a los valores teóricos cuando aumentan las replicaciones de los eventos, como se observa en la replica de 50 donde el valor de la media teórica y la media del experimento son muy similares. Lo mismo ocurre con la desviación estándar, que mejora notablemente al aumentar las réplicas. Esto es interesante porque permite que la Unidad de Farmacia pueda gestionar de forma adecuada el esquema de tratamiento de insulina para pacientes con diabetes como los del conjunto de datos que se ha estudiado.
+```
