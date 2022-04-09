@@ -1,5 +1,5 @@
 ---
-title: "Monte Carlo"
+title: "Monte Carlo Simulation"
 author: "Nicolas Ayala"
 date: "01-10-2021"
 output: html_document
